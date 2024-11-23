@@ -7,50 +7,55 @@ pipeline {
         stage('Setup') {
             steps {
                 script {
+                    // Check if the virtual environment exists
                     if (!fileExists("${env.WORKSPACE}\\${VIRTUAL_ENV}")) {
                         bat "python -m venv ${VIRTUAL_ENV}"
                     }
-                    bat "${VIRTUAL_ENV}\\Scripts\\activate && pip install -r requirements.txt"
                 }
+                // Activate the virtual environment and install requirements
+                bat """
+                    call ${VIRTUAL_ENV}\\Scripts\\activate.bat
+                    pip install -r requirements.txt
+                """
             }
         }
         stage('Lint') {
             steps {
-                script {
-                    bat "${VIRTUAL_ENV}\\Scripts\\activate && flake8 app.py"
-                }
+                // Run flake8 within the activated virtual environment
+                bat """
+                    call ${VIRTUAL_ENV}\\Scripts\\activate.bat
+                    flake8 app.py
+                """
             }
         }
         stage('Test') {
             steps {
-                script {
-                    bat "${VIRTUAL_ENV}\\Scripts\\activate && pytest"
-                }
+                // Run pytest within the activated virtual environment
+                bat """
+                    call ${VIRTUAL_ENV}\\Scripts\\activate.bat
+                    pytest
+                """
             }
         }
         stage('Coverage') {
             steps {
-                script {
-                    bat "${VIRTUAL_ENV}\\Scripts\\activate && coverage run -m pytest"
-                    bat "${VIRTUAL_ENV}\\Scripts\\activate && coverage report"
-                }
+                // Run coverage analysis within the activated virtual environment
+                bat """
+                    call ${VIRTUAL_ENV}\\Scripts\\activate.bat
+                    coverage run -m pytest
+                    coverage report
+                """
             }
         }
         stage('Deploy') {
             steps {
-                script {
-                    echo "Deploying application..."
-                }
+                echo "Deploying application..."
             }
         }
     }
     post {
         always {
-            script {
-                if (fileExists("${env.WORKSPACE}")) {
-                    cleanWs()
-                }
-            }
+            cleanWs()
         }
     }
 }
