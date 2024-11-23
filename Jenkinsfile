@@ -28,6 +28,14 @@ pipeline {
                 }
             }
         }
+        stage('Coverage') {  // Add the Coverage stage here
+            steps {
+                script {
+                    sh "source ${VIRTUAL_ENV}/bin/activate && coverage run -m pytest"
+                    sh "source ${VIRTUAL_ENV}/bin/activate && coverage report"
+                }
+            }
+        }
         stage('Deploy') {
             steps {
                 script {
