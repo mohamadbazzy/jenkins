@@ -7,32 +7,32 @@ pipeline {
         stage('Setup') {
             steps {
                 script {
-                    if (!fileExists("${env.WORKSPACE}/${VIRTUAL_ENV}")) {
-                        sh "python -m venv ${VIRTUAL_ENV}"
+                    if (!fileExists("${env.WORKSPACE}\\${VIRTUAL_ENV}")) {
+                        bat "python -m venv ${VIRTUAL_ENV}"
                     }
-                    sh "source ${VIRTUAL_ENV}/bin/activate && pip install -r requirements.txt"
+                    bat "${VIRTUAL_ENV}\\Scripts\\activate && pip install -r requirements.txt"
                 }
             }
         }
         stage('Lint') {
             steps {
                 script {
-                    sh "source ${VIRTUAL_ENV}/bin/activate && flake8 app.py"
+                    bat "${VIRTUAL_ENV}\\Scripts\\activate && flake8 app.py"
                 }
             }
         }
         stage('Test') {
             steps {
                 script {
-                    sh "source ${VIRTUAL_ENV}/bin/activate && pytest"
+                    bat "${VIRTUAL_ENV}\\Scripts\\activate && pytest"
                 }
             }
         }
-        stage('Coverage') {  // Add the Coverage stage here
+        stage('Coverage') {
             steps {
                 script {
-                    sh "source ${VIRTUAL_ENV}/bin/activate && coverage run -m pytest"
-                    sh "source ${VIRTUAL_ENV}/bin/activate && coverage report"
+                    bat "${VIRTUAL_ENV}\\Scripts\\activate && coverage run -m pytest"
+                    bat "${VIRTUAL_ENV}\\Scripts\\activate && coverage report"
                 }
             }
         }
@@ -46,7 +46,11 @@ pipeline {
     }
     post {
         always {
-            cleanWs()
+            script {
+                if (fileExists("${env.WORKSPACE}")) {
+                    cleanWs()
+                }
+            }
         }
     }
 }
